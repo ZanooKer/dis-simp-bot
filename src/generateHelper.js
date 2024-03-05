@@ -1,18 +1,36 @@
+const fs = require("fs");
+const { readdirSync } = require("fs");
+
 // Generate json file described all bot's functions
-module.exports = async function loadCommands(bot) {
+module.exports = async function loadCommands() {
+  let helperJSON = { commands: [] };
+
   readdirSync("./src/commands/").forEach((dirs) => {
+    const categoryJSON = { category: dirs, commands: [] };
     const commands = readdirSync(`./src/commands/${dirs}`).filter((files) =>
       files.endsWith(".js")
     );
 
     for (const file of commands) {
       const command = require(`./commands/${dirs}/${file}`);
-      if (command.name && command.description) {
-        CommandsArray.push(command);
-        console.log(`-> [Loaded Command] ${command.name.toLowerCase()}`);
-        client.commands.set(command.name.toLowerCase(), command);
-        delete require.cache[require.resolve(`./commands/${dirs}/${file}`)];
-      } else console.log(`[failed Command]  ${command.name.toLowerCase()}`);
+
+      const commandJSON = {};
+      commandJSON["name"] = command.name ?? "";
+      commandJSON["description"] = command.description ?? "";
+      categoryJSON.commands.push(commandJSON);
     }
+    helperJSON.commands.push(categoryJSON);
   });
+
+  fs.writeFile(
+    "./helpers.json",
+    JSON.stringify(helperJSON, null, 2),
+    (error) => {
+      if (error) {
+        console.log("An error has occurred ", error);
+        return;
+      }
+      console.log("Data written successfully to disk");
+    }
+  );
 };

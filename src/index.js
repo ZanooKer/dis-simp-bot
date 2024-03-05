@@ -78,3 +78,6 @@ client.on("ready", (client) => {
   if (config.app.global) client.application.commands.set(CommandsArray);
   else client.guilds.cache.get(config.app.guild).commands.set(CommandsArray);
 });
+
+// Generate helpers
+require("./generateHelper")();
